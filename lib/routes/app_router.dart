@@ -115,7 +115,7 @@ class AdminShell extends ConsumerStatefulWidget {
 class _AdminShellState extends ConsumerState<AdminShell> {
   int _currentIndex = 0;
 
-  final _routes = ['/home', '/admin', '/admin/vehicles', '/admin/bookings'];
+  final _routes = ['/home', '/admin', '/admin/vehicles', '/admin/bookings', '/admin/profile'];
 
   @override
   void didChangeDependencies() {
@@ -140,8 +140,6 @@ class _AdminShellState extends ConsumerState<AdminShell> {
   void _go(int index) {
     if (index < _routes.length) {
       context.go(_routes[index]);
-    } else if (index == 4) {
-      context.go('/profile');
     }
   }
 
@@ -264,6 +262,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/admin/add-vehicle',
           builder: (context, state) => const AddVehicleScreen(),
+        ),
+        GoRoute(
+          path: '/admin/profile',
+          builder: (context, state) => const ProfileScreen(),
         ),
       ],
     ),
