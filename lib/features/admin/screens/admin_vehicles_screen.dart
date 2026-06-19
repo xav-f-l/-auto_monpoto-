@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/admin_provider.dart';
-import '../../vehicles/models/vehicle_model.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import 'edit_vehicle_screen.dart';
 
 class AdminVehiclesScreen extends ConsumerWidget {
   const AdminVehiclesScreen({super.key});
@@ -99,9 +99,14 @@ class AdminVehiclesScreen extends ConsumerWidget {
                         Column(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.image,
+                              icon: const Icon(Icons.edit,
                                   size: 20, color: AppColors.info),
-                              onPressed: () => _addImageDialog(context, ref, vehicle),
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => EditVehicleScreen(vehicle: vehicle),
+                                ),
+                              ),
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete,
@@ -117,51 +122,6 @@ class AdminVehiclesScreen extends ConsumerWidget {
                 );
               },
             ),
-    );
-  }
-
-  void _addImageDialog(
-      BuildContext context, WidgetRef ref, VehicleModel vehicle) {
-    final controller = TextEditingController(
-      text: 'https://upload.wikimedia.org/wikipedia/commons/7/72/2019_Tesla_Model_3_Standard_Range_Plus.jpg',
-    );
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Ajouter une image - ${vehicle.fullName}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text("Colle l'URL de l'image :"),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                hintText: "URL de l'image",
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.isNotEmpty) {
-                final updated = vehicle.copyWith(
-                  images: [...vehicle.images, controller.text],
-                );
-                ref.read(adminProvider.notifier).updateVehicle(updated);
-                Navigator.pop(ctx);
-              }
-            },
-            child: const Text('Ajouter'),
-          ),
-        ],
-      ),
     );
   }
 

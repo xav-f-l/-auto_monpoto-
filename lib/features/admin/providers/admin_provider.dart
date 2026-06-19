@@ -133,12 +133,23 @@ class AdminNotifier extends StateNotifier<AdminState> {
     }
   }
 
-  Future<void> updateVehicle(VehicleModel vehicle) async {
+  Future<void> updateVehicle(VehicleModel vehicle, List<String> newImagePaths) async {
     try {
+      var images = List<String>.from(vehicle.images);
+      for (final path in newImagePaths) {
+        final file = File(path);
+        final ref = _storage
+            .ref()
+            .child('vehicles/${DateTime.now().millisecondsSinceEpoch}.jpg');
+        await ref.putFile(file);
+        final url = await ref.getDownloadURL();
+        images.add(url);
+      }
+      final updated = vehicle.copyWith(images: images);
       await _firestore
           .collection('vehicles')
           .doc(vehicle.id)
-          .update(vehicle.toMap());
+          .update(updated.toMap());
       await loadDashboard();
     } catch (e) {
       state = state.copyWith(error: 'Erreur de mise à jour');
