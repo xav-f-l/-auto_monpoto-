@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "150710241384",
+    "project_id": "locationauto-c2a04",
+    "storage_bucket": "locationauto-c2a04.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:150710241384:android:f5f313fd907fc15c9153dd",
+        "android_client_info": {
+          "package_name": "com.automonpoto.auto_monpoto"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChAqmySfZTm90_iB_FfUpXdUUU1YkiHDs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
