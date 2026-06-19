@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==================== FONCTIONS UTILES ====================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isOwnerOrAdmin(userId) {
+      return isOwner(userId) || isAdmin();
+    }
+
+    // ==================== UTILISATEURS ====================
+    match /users/{userId} {
+      allow read: if isOwnerOrAdmin(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwnerOrAdmin(userId);
+      allow delete: if isAdmin();
+
+      // Sous-collection documents (permis, ID, passeport)
+      match /documents/{docId} {
+        allow read, delete: if isOwnerOrAdmin(userId);
+        allow create: if isOwner(userId);
+      }
+    }
+
+    // ==================== VÉHICULES ====================
+    match /vehicles/{vehicleId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ==================== RÉSERVATIONS ====================
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated()
+        && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated();
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ==================== PAIEMENTS ====================
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated()
+        && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ==================== NOTIFICATIONS ====================
+    match /notifications/{notifId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // ==================== PRÉFÉRENCES NOTIFICATIONS ====================
+    match /notification_prefs/{userId} {
+      allow read, write: if isOwnerOrAdmin(userId);
+    }
+
+    // ==================== FILE DE NOTIFICATIONS (legacy) ====================
+    match /notification_queue/{docId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // ==================== REFUS PAR DÉFAUT ====================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
