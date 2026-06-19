@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -48,17 +49,29 @@ class AdminState {
 class AdminNotifier extends StateNotifier<AdminState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
+  StreamSubscription? _vehiclesSubscription;
 
-  AdminNotifier() : super(const AdminState());
+  AdminNotifier() : super(const AdminState()) {
+    _setupVehiclesListener();
+  }
 
-  Future<void> loadDashboard() async {
-    state = state.copyWith(isLoading: true);
-    try {
-      final vehiclesSnap = await _firestore.collection('vehicles').get();
-      final vehicles = vehiclesSnap.docs
+  void _setupVehiclesListener() {
+    _vehiclesSubscription = _firestore
+        .collection('vehicles')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+      final vehicles = snapshot.docs
           .map((doc) => VehicleModel.fromMap(doc.data(), doc.id))
           .toList();
+      state = state.copyWith(vehicles: vehicles, isLoading: false, error: null);
+    }, onError: (e) {
+      state = state.copyWith(isLoading: false, error: 'Erreur de chargement');
+    });
+  }
 
+  Future<void> loadDashboard() async {
+    try {
       final bookingsSnap = await _firestore
           .collection('bookings')
           .orderBy('createdAt', descending: true)
@@ -78,23 +91,17 @@ class AdminNotifier extends StateNotifier<AdminState> {
           bookings.where((b) => b.isActive).length;
 
       state = state.copyWith(
-        vehicles: vehicles,
         bookings: bookings,
         totalUsers: totalUsers,
         totalRevenue: totalRevenue,
         activeBookings: activeBookings,
-        isLoading: false,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erreur de chargement du dashboard',
-      );
+      state = state.copyWith(error: 'Erreur de chargement du dashboard');
     }
   }
 
   Future<void> addVehicle(VehicleModel vehicle, List<String> imagePaths) async {
-    state = state.copyWith(isLoading: true, error: null);
     try {
       final imageUrls = <String>[];
       for (final path in imagePaths) {
@@ -123,13 +130,8 @@ class AdminNotifier extends StateNotifier<AdminState> {
           'createdAt': FieldValue.serverTimestamp(),
         });
       } catch (_) {}
-
-      await loadDashboard();
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erreur lors de l\'ajout du véhicule',
-      );
+      state = state.copyWith(error: 'Erreur lors de l\'ajout du véhicule');
     }
   }
 
@@ -159,7 +161,6 @@ class AdminNotifier extends StateNotifier<AdminState> {
   Future<void> deleteVehicle(String id) async {
     try {
       await _firestore.collection('vehicles').doc(id).delete();
-      await loadDashboard();
     } catch (e) {
       state = state.copyWith(error: 'Erreur de suppression');
     }
@@ -196,8 +197,6 @@ class AdminNotifier extends StateNotifier<AdminState> {
           });
         } catch (_) {}
       }
-
-      await loadDashboard();
     } catch (e) {
       state = state.copyWith(error: 'Erreur de mise à jour');
     }
@@ -216,6 +215,12 @@ class AdminNotifier extends StateNotifier<AdminState> {
         .map((e) => {'month': e.key, 'revenue': e.value})
         .toList()
       ..sort((a, b) => a['month'].toString().compareTo(b['month'].toString()));
+  }
+
+  @override
+  void dispose() {
+    _vehiclesSubscription?.cancel();
+    super.dispose();
   }
 }
 
