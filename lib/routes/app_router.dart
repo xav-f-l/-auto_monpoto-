@@ -16,6 +16,8 @@ import '../features/admin/screens/admin_dashboard_screen.dart';
 import '../features/admin/screens/admin_vehicles_screen.dart';
 import '../features/admin/screens/admin_bookings_screen.dart';
 import '../features/admin/screens/add_vehicle_screen.dart';
+import '../features/auth/providers/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
 class AppShell extends StatelessWidget {
@@ -46,13 +48,32 @@ class _MainShellState extends State<MainShell> {
   final _routes = ['/home', '/vehicles', '/my-bookings', '/profile'];
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateIndex();
+  }
+
+  @override
+  void didUpdateWidget(covariant MainShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateIndex();
+  }
+
+  void _updateIndex() {
+    final location = GoRouterState.of(context).uri.toString();
+    final index = _routes.indexWhere((r) => location.startsWith(r));
+    if (index != -1 && index != _currentIndex) {
+      setState(() => _currentIndex = index);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          setState(() => _currentIndex = index);
           context.go(_routes[index]);
         },
         items: const [
@@ -82,19 +103,47 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
-class AdminShell extends StatefulWidget {
+class AdminShell extends ConsumerStatefulWidget {
   final Widget child;
 
   const AdminShell({super.key, required this.child});
 
   @override
-  State<AdminShell> createState() => _AdminShellState();
+  ConsumerState<AdminShell> createState() => _AdminShellState();
 }
 
-class _AdminShellState extends State<AdminShell> {
+class _AdminShellState extends ConsumerState<AdminShell> {
   int _currentIndex = 0;
 
-  final _routes = ['/admin', '/admin/vehicles', '/admin/bookings', '/profile'];
+  final _routes = ['/home', '/admin', '/admin/vehicles', '/admin/bookings'];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateIndex();
+  }
+
+  @override
+  void didUpdateWidget(covariant AdminShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateIndex();
+  }
+
+  void _updateIndex() {
+    final location = GoRouterState.of(context).uri.toString();
+    final index = _routes.indexWhere((r) => location.startsWith(r));
+    if (index != -1 && index != _currentIndex) {
+      setState(() => _currentIndex = index);
+    }
+  }
+
+  void _go(int index) {
+    if (index < _routes.length) {
+      context.go(_routes[index]);
+    } else if (index == 4) {
+      context.go('/profile');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,11 +151,13 @@ class _AdminShellState extends State<AdminShell> {
       body: widget.child,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() => _currentIndex = index);
-          context.go(_routes[index]);
-        },
+        onTap: _go,
         items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Accueil',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
             activeIcon: Icon(Icons.dashboard),

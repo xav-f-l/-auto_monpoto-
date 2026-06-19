@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/admin_provider.dart';
 import '../../../core/theme/app_colors.dart';
@@ -247,7 +248,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                 'Véhicules',
                 Icons.directions_car,
                 AppColors.primary,
-                () => Navigator.pushNamed(context, '/admin/vehicles'),
+                () => context.go('/admin/vehicles'),
               ),
             ),
             const SizedBox(width: 12),
@@ -256,7 +257,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                 'Réservations',
                 Icons.calendar_month,
                 AppColors.success,
-                () => Navigator.pushNamed(context, '/admin/bookings'),
+                () => context.go('/admin/bookings'),
               ),
             ),
             Expanded(
@@ -264,7 +265,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                 'Ajouter',
                 Icons.add_circle,
                 AppColors.accent,
-                () => Navigator.pushNamed(context, '/admin/add-vehicle'),
+                () => context.go('/admin/add-vehicle'),
               ),
             ),
           ],
