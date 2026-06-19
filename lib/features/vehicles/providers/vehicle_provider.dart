@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/vehicle_model.dart';
@@ -67,19 +68,19 @@ class VehicleState {
 
 class VehicleNotifier extends StateNotifier<VehicleState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  StreamSubscription? _vehiclesSubscription;
+  StreamSubscription? _selectedVehicleSubscription;
 
   VehicleNotifier() : super(const VehicleState()) {
-    _loadVehicles();
+    _setupVehiclesListener();
   }
 
-  Future<void> _loadVehicles() async {
-    state = state.copyWith(isLoading: true, error: null);
-    try {
-      final snapshot = await _firestore
-          .collection('vehicles')
-          .orderBy('createdAt', descending: true)
-          .get();
-
+  void _setupVehiclesListener() {
+    _vehiclesSubscription = _firestore
+        .collection('vehicles')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .listen((snapshot) {
       final vehicles = snapshot.docs
           .map((doc) => VehicleModel.fromMap(doc.data(), doc.id))
           .toList();
@@ -91,13 +92,14 @@ class VehicleNotifier extends StateNotifier<VehicleState> {
         vehicles: vehicles,
         popularVehicles: popular.take(10).toList(),
         isLoading: false,
+        error: null,
       );
-    } catch (e) {
+    }, onError: (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Erreur lors du chargement des véhicules',
       );
-    }
+    });
   }
 
   void setCategory(String? category) {
@@ -120,20 +122,31 @@ class VehicleNotifier extends StateNotifier<VehicleState> {
     );
   }
 
-  Future<void> selectVehicle(String id) async {
-    state = state.copyWith(isLoading: true);
-    try {
-      final doc = await _firestore.collection('vehicles').doc(id).get();
-      if (doc.exists) {
-        final vehicle = VehicleModel.fromMap(doc.data()!, doc.id);
+  void selectVehicle(String id) {
+    _selectedVehicleSubscription?.cancel();
+    state = state.copyWith(isLoading: true, error: null);
+    _selectedVehicleSubscription = _firestore
+        .collection('vehicles')
+        .doc(id)
+        .snapshots()
+        .listen((docSnapshot) {
+      if (docSnapshot.exists) {
+        final vehicle = VehicleModel.fromMap(docSnapshot.data()!, docSnapshot.id);
         state = state.copyWith(selectedVehicle: vehicle, isLoading: false);
+      } else {
+        state = state.copyWith(selectedVehicle: null, isLoading: false, error: 'Véhicule introuvable');
       }
-    } catch (e) {
+    }, onError: (e) {
       state = state.copyWith(isLoading: false, error: 'Véhicule introuvable');
-    }
+    });
   }
 
-  Future<void> refresh() => _loadVehicles();
+  @override
+  void dispose() {
+    _vehiclesSubscription?.cancel();
+    _selectedVehicleSubscription?.cancel();
+    super.dispose();
+  }
 }
 
 final vehicleProvider = StateNotifierProvider<VehicleNotifier, VehicleState>(
