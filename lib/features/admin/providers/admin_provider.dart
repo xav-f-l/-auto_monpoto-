@@ -136,6 +136,7 @@ class AdminNotifier extends StateNotifier<AdminState> {
 
       return true;
     } catch (e) {
+      print('addVehicle error: $e');
       state = state.copyWith(error: 'Erreur lors de l\'ajout du véhicule');
       return false;
     }
