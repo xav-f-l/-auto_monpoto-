@@ -116,7 +116,7 @@ class AdminShell extends ConsumerStatefulWidget {
 class _AdminShellState extends ConsumerState<AdminShell> {
   int _currentIndex = 0;
 
-  final _routes = ['/admin', '/admin/vehicles', '/admin/bookings', '/admin/profile'];
+  final _routes = ['/admin/vehicles', '/admin/bookings', '/admin/profile', '/admin'];
 
   @override
   void didChangeDependencies() {

@@ -64,15 +64,15 @@ class AdminVehiclesScreen extends ConsumerWidget {
                           child: vehicle.images.isNotEmpty
                               ? CachedNetworkImage(
                                   imageUrl: vehicle.images.first,
-                                  width: 80,
-                                  height: 60,
+                                  width: 100,
+                                  height: 75,
                                   fit: BoxFit.cover,
                                 )
                               : Container(
-                                  width: 80,
-                                  height: 60,
+                                  width: 100,
+                                  height: 75,
                                   color: Colors.grey[200],
-                                  child: const Icon(Icons.directions_car),
+                                  child: const Icon(Icons.directions_car, size: 32),
                                 ),
                         ),
                         const SizedBox(width: 12),
@@ -87,17 +87,39 @@ class AdminVehiclesScreen extends ConsumerWidget {
                                   fontSize: 15,
                                 ),
                               ),
-                              Text(
-                                '${vehicle.pricePerDay.toStringAsFixed(0)} FCFA/jour',
-                                style: const TextStyle(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              const SizedBox(height: 4),
                               Row(
                                 children: [
+                                  Icon(Icons.local_offer,
+                                      size: 14, color: AppColors.primary),
+                                  const SizedBox(width: 4),
                                   Text(
-                                    vehicle.available ? 'Disponible' : 'Indisponible',
+                                    '${vehicle.pricePerDay.toStringAsFixed(0)} FCFA/jour',
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    vehicle.available
+                                        ? Icons.check_circle
+                                        : Icons.cancel,
+                                    size: 14,
+                                    color: vehicle.available
+                                        ? AppColors.success
+                                        : AppColors.error,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    vehicle.available
+                                        ? 'Disponible'
+                                        : 'Indisponible',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: vehicle.available
@@ -106,6 +128,9 @@ class AdminVehiclesScreen extends ConsumerWidget {
                                     ),
                                   ),
                                   const SizedBox(width: 12),
+                                  Icon(Icons.category,
+                                      size: 14, color: AppColors.textSecondary),
+                                  const SizedBox(width: 4),
                                   Text(
                                     vehicle.category,
                                     style: const TextStyle(
@@ -119,6 +144,7 @@ class AdminVehiclesScreen extends ConsumerWidget {
                           ),
                         ),
                         Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
                               icon: const Icon(Icons.edit,

@@ -103,6 +103,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
 
     final success = await ref.read(adminProvider.notifier).addVehicle(vehicle, _localImages);
     if (!context.mounted) return;
+    setState(() => _isLoading = false);
     context.pop(success);
   }
 
