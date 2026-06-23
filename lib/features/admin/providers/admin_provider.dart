@@ -103,16 +103,16 @@ class AdminNotifier extends StateNotifier<AdminState> {
 
   Future<bool> addVehicle(VehicleModel vehicle, List<String> imagePaths) async {
     try {
-      final imageUrls = <String>[];
-      for (final path in imagePaths) {
+      final uploadTasks = imagePaths.map((path) async {
         final file = File(path);
         final ref = _storage
             .ref()
-            .child('vehicles/${DateTime.now().millisecondsSinceEpoch}.jpg');
+            .child('vehicles/${DateTime.now().millisecondsSinceEpoch}_${path.hashCode}.jpg');
         await ref.putFile(file);
-        final url = await ref.getDownloadURL();
-        imageUrls.add(url);
-      }
+        return ref.getDownloadURL();
+      });
+
+      final imageUrls = await Future.wait(uploadTasks);
 
       final vehicleWithImages = vehicle.copyWith(images: imageUrls);
       await _firestore
@@ -141,14 +141,17 @@ class AdminNotifier extends StateNotifier<AdminState> {
   Future<void> updateVehicle(VehicleModel vehicle, List<String> newImagePaths) async {
     try {
       var images = List<String>.from(vehicle.images);
-      for (final path in newImagePaths) {
-        final file = File(path);
-        final ref = _storage
-            .ref()
-            .child('vehicles/${DateTime.now().millisecondsSinceEpoch}.jpg');
-        await ref.putFile(file);
-        final url = await ref.getDownloadURL();
-        images.add(url);
+      if (newImagePaths.isNotEmpty) {
+        final uploadTasks = newImagePaths.map((path) async {
+          final file = File(path);
+          final ref = _storage
+              .ref()
+              .child('vehicles/${DateTime.now().millisecondsSinceEpoch}_${path.hashCode}.jpg');
+          await ref.putFile(file);
+          return ref.getDownloadURL();
+        });
+        final urls = await Future.wait(uploadTasks);
+        images.addAll(urls);
       }
       final updated = vehicle.copyWith(images: images);
       await _firestore
