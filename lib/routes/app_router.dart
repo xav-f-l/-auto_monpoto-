@@ -116,7 +116,7 @@ class AdminShell extends ConsumerStatefulWidget {
 class _AdminShellState extends ConsumerState<AdminShell> {
   int _currentIndex = 0;
 
-  final _routes = ['/home', '/admin', '/admin/vehicles', '/admin/bookings', '/admin/profile'];
+  final _routes = ['/admin', '/admin/vehicles', '/admin/bookings', '/admin/profile'];
 
   @override
   void didChangeDependencies() {
@@ -152,11 +152,6 @@ class _AdminShellState extends ConsumerState<AdminShell> {
         currentIndex: _currentIndex,
         onTap: _go,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Accueil',
-          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
             activeIcon: Icon(Icons.dashboard),
