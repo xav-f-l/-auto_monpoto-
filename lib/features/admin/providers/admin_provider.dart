@@ -101,7 +101,7 @@ class AdminNotifier extends StateNotifier<AdminState> {
     }
   }
 
-  Future<void> addVehicle(VehicleModel vehicle, List<String> imagePaths) async {
+  Future<bool> addVehicle(VehicleModel vehicle, List<String> imagePaths) async {
     try {
       final imageUrls = <String>[];
       for (final path in imagePaths) {
@@ -130,8 +130,11 @@ class AdminNotifier extends StateNotifier<AdminState> {
           'createdAt': FieldValue.serverTimestamp(),
         });
       } catch (_) {}
+
+      return true;
     } catch (e) {
       state = state.copyWith(error: 'Erreur lors de l\'ajout du véhicule');
+      return false;
     }
   }
 

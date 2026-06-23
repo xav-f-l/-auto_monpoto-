@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/admin_provider.dart';
 import '../../vehicles/models/vehicle_model.dart';
 import '../../../core/theme/app_colors.dart';
@@ -36,6 +37,7 @@ class _EditVehicleScreenState extends ConsumerState<EditVehicleScreen> {
   late bool _available;
   late List<String> _existingImages;
   final List<String> _newImages = [];
+  bool _isSaving = false;
 
   final List<String> _categories = [
     'standard', 'SUV', 'électrique', 'utilitaire', 'berline'
@@ -101,8 +103,9 @@ class _EditVehicleScreenState extends ConsumerState<EditVehicleScreen> {
     });
   }
 
-  void _handleSave() {
+  Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) return;
+    setState(() => _isSaving = true);
 
     final updated = widget.vehicle.copyWith(
       brand: _brandController.text.trim(),
@@ -120,11 +123,9 @@ class _EditVehicleScreenState extends ConsumerState<EditVehicleScreen> {
       location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
     );
 
-    ref.read(adminProvider.notifier).updateVehicle(updated, _newImages);
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Véhicule mis à jour')),
-    );
+    await ref.read(adminProvider.notifier).updateVehicle(updated, _newImages);
+    if (!context.mounted) return;
+    context.pop();
   }
 
   @override
@@ -294,11 +295,13 @@ class _EditVehicleScreenState extends ConsumerState<EditVehicleScreen> {
                 maxLines: 4,
               ),
               const SizedBox(height: 32),
-              CustomButton(
-                text: 'Enregistrer les modifications',
-                onPressed: _handleSave,
-                icon: Icons.save,
-              ),
+              _isSaving
+                  ? const Center(child: CircularProgressIndicator())
+                  : CustomButton(
+                      text: 'Enregistrer les modifications',
+                      onPressed: _handleSave,
+                      icon: Icons.save,
+                    ),
               const SizedBox(height: 24),
             ],
           ),

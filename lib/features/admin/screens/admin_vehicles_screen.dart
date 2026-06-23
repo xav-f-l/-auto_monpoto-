@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/admin_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
-import 'edit_vehicle_screen.dart';
 
 class AdminVehiclesScreen extends ConsumerWidget {
   const AdminVehiclesScreen({super.key});
@@ -19,8 +19,14 @@ class AdminVehiclesScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () =>
-                Navigator.pushNamed(context, '/admin/add-vehicle'),
+            onPressed: () async {
+              final result = await context.push<bool>('/admin/add-vehicle');
+              if (result == true && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Véhicule ajouté')),
+                );
+              }
+            },
           ),
         ],
       ),
@@ -117,11 +123,9 @@ class AdminVehiclesScreen extends ConsumerWidget {
                             IconButton(
                               icon: const Icon(Icons.edit,
                                   size: 20, color: AppColors.info),
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => EditVehicleScreen(vehicle: vehicle),
-                                ),
+                              onPressed: () => context.push(
+                                '/admin/edit-vehicle',
+                                extra: vehicle,
                               ),
                             ),
                             IconButton(

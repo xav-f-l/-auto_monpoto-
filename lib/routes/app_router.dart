@@ -16,6 +16,8 @@ import '../features/admin/screens/admin_dashboard_screen.dart';
 import '../features/admin/screens/admin_vehicles_screen.dart';
 import '../features/admin/screens/admin_bookings_screen.dart';
 import '../features/admin/screens/add_vehicle_screen.dart';
+import '../features/admin/screens/edit_vehicle_screen.dart';
+import '../features/vehicles/models/vehicle_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
@@ -261,6 +263,13 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/admin/add-vehicle',
           builder: (context, state) => const AddVehicleScreen(),
+        ),
+        GoRoute(
+          path: '/admin/edit-vehicle',
+          builder: (context, state) {
+            final vehicle = state.extra as VehicleModel;
+            return EditVehicleScreen(vehicle: vehicle);
+          },
         ),
         GoRoute(
           path: '/admin/profile',

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/admin_provider.dart';
 import '../../vehicles/models/vehicle_model.dart';
 import '../../../core/theme/app_colors.dart';
@@ -30,6 +31,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   String _transmission = 'Manuelle';
   String _fuelType = 'Essence';
   bool _available = true;
+  bool _isLoading = false;
   final List<String> _selectedImages = [];
 
   final List<String> _categories = [
@@ -60,8 +62,10 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
     }
   }
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
 
     final vehicle = VehicleModel(
       id: '',
@@ -81,11 +85,9 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       updatedAt: DateTime.now(),
     );
 
-    ref.read(adminProvider.notifier).addVehicle(vehicle, _selectedImages);
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Véhicule ajouté avec succès')),
-    );
+    final success = await ref.read(adminProvider.notifier).addVehicle(vehicle, _selectedImages);
+    if (!context.mounted) return;
+    context.pop(success);
   }
 
   @override
@@ -268,11 +270,13 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                 maxLines: 4,
               ),
               const SizedBox(height: 32),
-              CustomButton(
-                text: 'Ajouter le véhicule',
-                onPressed: _handleSubmit,
-                icon: Icons.add_circle,
-              ),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : CustomButton(
+                      text: 'Ajouter le véhicule',
+                      onPressed: _handleSubmit,
+                      icon: Icons.add_circle,
+                    ),
               const SizedBox(height: 24),
             ],
           ),
