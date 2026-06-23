@@ -101,20 +101,23 @@ class AdminNotifier extends StateNotifier<AdminState> {
     }
   }
 
-  Future<bool> addVehicle(VehicleModel vehicle, List<String> imagePaths) async {
+  Future<bool> addVehicle(VehicleModel vehicle, List<String> localPaths) async {
     try {
-      final uploadTasks = imagePaths.map((path) async {
-        final file = File(path);
-        final ref = _storage
-            .ref()
-            .child('vehicles/${DateTime.now().millisecondsSinceEpoch}_${path.hashCode}.jpg');
-        await ref.putFile(file);
-        return ref.getDownloadURL();
-      });
+      var allImages = List<String>.from(vehicle.images);
+      if (localPaths.isNotEmpty) {
+        final uploadTasks = localPaths.map((path) async {
+          final file = File(path);
+          final ref = _storage
+              .ref()
+              .child('vehicles/${DateTime.now().millisecondsSinceEpoch}_${path.hashCode}.jpg');
+          await ref.putFile(file);
+          return ref.getDownloadURL();
+        });
+        final urls = await Future.wait(uploadTasks);
+        allImages.addAll(urls);
+      }
 
-      final imageUrls = await Future.wait(uploadTasks);
-
-      final vehicleWithImages = vehicle.copyWith(images: imageUrls);
+      final vehicleWithImages = vehicle.copyWith(images: allImages);
       await _firestore
           .collection('vehicles')
           .add(vehicleWithImages.toMap());

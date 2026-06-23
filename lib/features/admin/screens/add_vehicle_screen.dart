@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/admin_provider.dart';
 import '../../vehicles/models/vehicle_model.dart';
@@ -26,20 +27,18 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   final _yearController = TextEditingController();
   final _seatsController = TextEditingController();
   final _fuelConsumptionController = TextEditingController();
+  final _urlController = TextEditingController();
 
   String _category = 'standard';
   String _transmission = 'Manuelle';
   String _fuelType = 'Essence';
   bool _available = true;
   bool _isLoading = false;
-  final List<String> _selectedImages = [];
+  final List<String> _localImages = [];
+  final List<String> _urlImages = [];
 
   final List<String> _categories = [
-    'standard',
-    'SUV',
-    'électrique',
-    'utilitaire',
-    'berline'
+    'standard', 'SUV', 'électrique', 'utilitaire', 'berline'
   ];
 
   @override
@@ -51,6 +50,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
     _yearController.dispose();
     _seatsController.dispose();
     _fuelConsumptionController.dispose();
+    _urlController.dispose();
     super.dispose();
   }
 
@@ -58,12 +58,28 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      setState(() => _selectedImages.add(image.path));
+      setState(() => _localImages.add(image.path));
+    }
+  }
+
+  void _addUrl() {
+    final url = _urlController.text.trim();
+    if (url.isNotEmpty) {
+      setState(() {
+        _urlImages.add(url);
+        _urlController.clear();
+      });
     }
   }
 
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_localImages.isEmpty && _urlImages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ajoutez au moins une image (URL ou galerie)')),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -73,7 +89,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       model: _modelController.text.trim(),
       year: int.tryParse(_yearController.text) ?? DateTime.now().year,
       pricePerDay: double.tryParse(_priceController.text) ?? 0,
-      images: _selectedImages,
+      images: _urlImages,
       description: _descriptionController.text.trim(),
       category: _category,
       available: _available,
@@ -85,9 +101,17 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       updatedAt: DateTime.now(),
     );
 
-    final success = await ref.read(adminProvider.notifier).addVehicle(vehicle, _selectedImages);
+    final success = await ref.read(adminProvider.notifier).addVehicle(vehicle, _localImages);
     if (!context.mounted) return;
     context.pop(success);
+  }
+
+  void _removeUrl(int index) {
+    setState(() => _urlImages.removeAt(index));
+  }
+
+  void _removeLocal(int index) {
+    setState(() => _localImages.removeAt(index));
   }
 
   @override
@@ -101,41 +125,48 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Photos',
+              const Text('Images',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 100,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    ..._urlImages.asMap().entries.map((e) => _buildUrlTile(e.value, e.key)),
+                    ..._localImages.asMap().entries.map((e) => _buildLocalTile(e.value, e.key)),
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        width: 80, height: 80, margin: const EdgeInsets.only(right: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.add_photo_alternate, size: 32, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  ..._selectedImages.map((path) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            File(path),
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              width: 80,
-                              height: 80,
-                              color: Colors.grey[200],
-                              child: const Icon(Icons.broken_image),
-                            ),
-                          ),
-                        ),
-                      )),
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(8),
+                  Expanded(
+                    child: TextField(
+                      controller: _urlController,
+                      decoration: const InputDecoration(
+                        hintText: 'Coller une URL d\'image',
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                       ),
-                      child: const Icon(Icons.add_photo_alternate,
-                          size: 32, color: AppColors.textSecondary),
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle, color: AppColors.primary),
+                    onPressed: _addUrl,
                   ),
                 ],
               ),
@@ -230,28 +261,22 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _transmission,
-                      decoration:
-                          const InputDecoration(labelText: 'Transmission'),
+                      decoration: const InputDecoration(labelText: 'Transmission'),
                       items: ['Manuelle', 'Automatique']
-                          .map((t) =>
-                              DropdownMenuItem(value: t, child: Text(t)))
+                          .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                           .toList(),
-                      onChanged: (v) =>
-                          setState(() => _transmission = v ?? 'Manuelle'),
+                      onChanged: (v) => setState(() => _transmission = v ?? 'Manuelle'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _fuelType,
-                      decoration:
-                          const InputDecoration(labelText: 'Carburant'),
+                      decoration: const InputDecoration(labelText: 'Carburant'),
                       items: ['Essence', 'Diesel', 'Électrique', 'Hybride']
-                          .map((t) =>
-                              DropdownMenuItem(value: t, child: Text(t)))
+                          .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                           .toList(),
-                      onChanged: (v) =>
-                          setState(() => _fuelType = v ?? 'Essence'),
+                      onChanged: (v) => setState(() => _fuelType = v ?? 'Essence'),
                     ),
                   ),
                 ],
@@ -281,6 +306,73 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildUrlTile(String url, int index) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: CachedNetworkImage(
+              imageUrl: url,
+              width: 80, height: 80,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => Container(width: 80, height: 80, color: Colors.grey[200]),
+              errorWidget: (_, __, ___) => Container(
+                width: 80, height: 80, color: Colors.grey[200],
+                child: const Icon(Icons.broken_image),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0, right: 0,
+            child: GestureDetector(
+              onTap: () => _removeUrl(index),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: AppColors.error, shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, size: 16, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocalTile(String path, int index) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.file(
+              File(path), width: 80, height: 80, fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: 80, height: 80, color: Colors.grey[200],
+                child: const Icon(Icons.broken_image),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0, right: 0,
+            child: GestureDetector(
+              onTap: () => _removeLocal(index),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: AppColors.error, shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, size: 16, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
