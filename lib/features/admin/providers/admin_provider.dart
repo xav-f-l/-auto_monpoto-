@@ -158,11 +158,13 @@ class AdminNotifier extends StateNotifier<AdminState> {
     }
   }
 
-  Future<void> deleteVehicle(String id) async {
+  Future<bool> deleteVehicle(String id) async {
     try {
       await _firestore.collection('vehicles').doc(id).delete();
+      return true;
     } catch (e) {
       state = state.copyWith(error: 'Erreur de suppression');
+      return false;
     }
   }
 

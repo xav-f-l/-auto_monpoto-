@@ -26,7 +26,23 @@ class AdminVehiclesScreen extends ConsumerWidget {
       ),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
+          : state.error != null
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                      const SizedBox(height: 16),
+                      Text(state.error!, style: const TextStyle(color: AppColors.error)),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () => ref.read(adminProvider.notifier).loadDashboard(),
+                        child: const Text('Réessayer'),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
               padding: const EdgeInsets.all(AppConstants.defaultPadding),
               itemCount: state.vehicles.length,
               itemBuilder: (context, index) {
@@ -138,9 +154,17 @@ class AdminVehiclesScreen extends ConsumerWidget {
             child: const Text('Annuler'),
           ),
           TextButton(
-            onPressed: () {
-              ref.read(adminProvider.notifier).deleteVehicle(id);
+            onPressed: () async {
+              final success = await ref.read(adminProvider.notifier).deleteVehicle(id);
               Navigator.pop(ctx);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success ? '$name supprimé' : 'Erreur lors de la suppression'),
+                    backgroundColor: success ? AppColors.success : AppColors.error,
+                  ),
+                );
+              }
             },
             child: const Text('Supprimer',
                 style: TextStyle(color: AppColors.error)),

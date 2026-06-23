@@ -16,7 +16,6 @@ import '../features/admin/screens/admin_dashboard_screen.dart';
 import '../features/admin/screens/admin_vehicles_screen.dart';
 import '../features/admin/screens/admin_bookings_screen.dart';
 import '../features/admin/screens/add_vehicle_screen.dart';
-import '../features/auth/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
