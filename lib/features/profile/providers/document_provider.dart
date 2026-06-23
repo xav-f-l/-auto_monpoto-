@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import '../models/user_document.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../core/services/cloudinary_service.dart';
 
 class DocumentState {
   final List<UserDocument> documents;
@@ -31,7 +31,7 @@ class DocumentState {
 
 class DocumentNotifier extends StateNotifier<DocumentState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final CloudinaryService _cloudinary = CloudinaryService.instance;
   String? _userId;
 
   DocumentNotifier() : super(const DocumentState());
@@ -67,16 +67,12 @@ class DocumentNotifier extends StateNotifier<DocumentState> {
     if (_userId == null) return false;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final fileName = '${type}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final ref =
-          _storage.ref().child('documents/$_userId/$fileName');
-      await ref.putFile(file);
-      final url = await ref.getDownloadURL();
+      final url = await _cloudinary.uploadFile(file);
 
       final doc = {
         'type': type,
         'url': url,
-        'fileName': fileName,
+        'fileName': file.path.split('/').last,
         'verified': false,
         'uploadedAt': DateTime.now().toIso8601String(),
       };

@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import '../../vehicles/models/vehicle_model.dart';
 import '../../bookings/models/booking_model.dart';
+import '../../../core/services/cloudinary_service.dart';
 
 class AdminState {
   final List<VehicleModel> vehicles;
@@ -48,7 +48,7 @@ class AdminState {
 
 class AdminNotifier extends StateNotifier<AdminState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final CloudinaryService _cloudinary = CloudinaryService.instance;
   StreamSubscription? _vehiclesSubscription;
 
   AdminNotifier() : super(const AdminState()) {
@@ -105,14 +105,7 @@ class AdminNotifier extends StateNotifier<AdminState> {
     try {
       var allImages = List<String>.from(vehicle.images);
       if (localPaths.isNotEmpty) {
-        final uploadTasks = localPaths.map((path) async {
-          final file = File(path);
-          final ref = _storage
-              .ref()
-              .child('vehicles/${DateTime.now().millisecondsSinceEpoch}_${path.hashCode}.jpg');
-          await ref.putFile(file);
-          return ref.getDownloadURL();
-        });
+        final uploadTasks = localPaths.map((path) => _cloudinary.uploadFile(File(path)));
         final urls = await Future.wait(uploadTasks);
         allImages.addAll(urls);
       }
@@ -146,14 +139,7 @@ class AdminNotifier extends StateNotifier<AdminState> {
     try {
       var images = List<String>.from(vehicle.images);
       if (newImagePaths.isNotEmpty) {
-        final uploadTasks = newImagePaths.map((path) async {
-          final file = File(path);
-          final ref = _storage
-              .ref()
-              .child('vehicles/${DateTime.now().millisecondsSinceEpoch}_${path.hashCode}.jpg');
-          await ref.putFile(file);
-          return ref.getDownloadURL();
-        });
+        final uploadTasks = newImagePaths.map((path) => _cloudinary.uploadFile(File(path)));
         final urls = await Future.wait(uploadTasks);
         images.addAll(urls);
       }
