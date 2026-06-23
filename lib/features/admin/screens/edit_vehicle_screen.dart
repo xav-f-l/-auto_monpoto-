@@ -78,7 +78,7 @@ class _EditVehicleScreenState extends ConsumerState<EditVehicleScreen> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery);
+    final image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (image != null) {
       setState(() => _newImages.add(image.path));
     }
