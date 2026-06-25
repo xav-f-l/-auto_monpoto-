@@ -28,6 +28,11 @@ class NotificationService {
         iOS: iosSettings,
       ),
     );
+
+    final androidPlugin = _localNotifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.requestNotificationsPermission();
   }
 
   void showLocalNotification({
