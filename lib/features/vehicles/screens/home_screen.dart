@@ -222,7 +222,7 @@ class HomeScreen extends ConsumerWidget {
         hintText: 'Rechercher une voiture...',
         prefixIcon: const Icon(Icons.search),
         filled: true,
-        fillColor: Theme.of(context).cardTheme.color ?? Colors.white,
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
