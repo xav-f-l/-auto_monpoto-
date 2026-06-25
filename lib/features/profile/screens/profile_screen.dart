@@ -241,7 +241,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               title: const Text('Mes documents'),
               subtitle: const Text('Permis, pièce d\'identité'),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/documents'),
+              onTap: () => context.push(ref.read(authProvider).isAdmin
+                  ? '/admin/documents'
+                  : '/documents'),
             ),
             SwitchListTile(
               secondary: Icon(

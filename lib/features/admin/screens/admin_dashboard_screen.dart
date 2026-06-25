@@ -280,10 +280,10 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               () => context.go('/admin/profile'),
             ),
             _buildActionCard(
-              'Documents',
+              'Vérifier docs',
               Icons.verified_user,
               Colors.amber,
-              () => context.go('/admin/documents'),
+              () => context.go('/admin/verify-documents'),
             ),
             _buildActionCard(
               'Notifications',

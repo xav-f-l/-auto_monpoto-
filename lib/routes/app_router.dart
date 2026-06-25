@@ -313,6 +313,10 @@ final appRouter = GoRouter(
         ),
         GoRoute(
           path: '/admin/documents',
+          builder: (context, state) => const DocumentsScreen(),
+        ),
+        GoRoute(
+          path: '/admin/verify-documents',
           builder: (context, state) => const AdminDocumentsScreen(),
         ),
       ],
