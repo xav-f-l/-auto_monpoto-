@@ -19,8 +19,6 @@ class NotificationWatcher {
     final user = _ref.read(authProvider).user;
     if (user == null) return;
 
-    _ref.read(unreadNotificationCountProvider.notifier).state = 0;
-
     final cutoff = user.createdAt.isAfter(DateTime.now().subtract(const Duration(days: 7)))
         ? user.createdAt
         : DateTime.now().subtract(const Duration(days: 7));
