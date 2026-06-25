@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/vehicle_model.dart';
 
+const _unset = Object();
+
 class VehicleState {
   final List<VehicleModel> vehicles;
   final List<VehicleModel> popularVehicles;
@@ -30,9 +32,9 @@ class VehicleState {
     VehicleModel? selectedVehicle,
     bool? isLoading,
     String? error,
-    String? selectedCategory,
-    double? maxPrice,
-    String? searchQuery,
+    Object? selectedCategory = _unset,
+    Object? maxPrice = _unset,
+    Object? searchQuery = _unset,
   }) {
     return VehicleState(
       vehicles: vehicles ?? this.vehicles,
@@ -40,9 +42,14 @@ class VehicleState {
       selectedVehicle: selectedVehicle ?? this.selectedVehicle,
       isLoading: isLoading ?? this.isLoading,
       error: error,
-      selectedCategory: selectedCategory ?? this.selectedCategory,
-      maxPrice: maxPrice ?? this.maxPrice,
-      searchQuery: searchQuery ?? this.searchQuery,
+      selectedCategory: selectedCategory == _unset
+          ? this.selectedCategory
+          : (selectedCategory as String?),
+      maxPrice:
+          maxPrice == _unset ? this.maxPrice : (maxPrice as double?),
+      searchQuery: searchQuery == _unset
+          ? this.searchQuery
+          : (searchQuery as String?),
     );
   }
 

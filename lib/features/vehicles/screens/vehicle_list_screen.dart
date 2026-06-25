@@ -71,36 +71,47 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  if (vehicleState.selectedCategory != null)
-                    FilterChip(
-                      label: Text(vehicleState.selectedCategory!),
-                      selected: true,
-                      onSelected: (_) {
-                        ref
-                            .read(vehicleProvider.notifier)
-                            .setCategory(null);
-                      },
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          if (vehicleState.selectedCategory != null)
+                            FilterChip(
+                              label: Text(vehicleState.selectedCategory!),
+                              selected: true,
+                              onSelected: (_) => ref
+                                  .read(vehicleProvider.notifier)
+                                  .setCategory(null),
+                            ),
+                          if (vehicleState.maxPrice != null) ...[
+                            const SizedBox(width: 8),
+                            FilterChip(
+                              label: Text(
+                                  'Max: ${vehicleState.maxPrice!.toStringAsFixed(0)} FCFA'),
+                              selected: true,
+                              onSelected: (_) => ref
+                                  .read(vehicleProvider.notifier)
+                                  .setMaxPrice(null),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-                  if (vehicleState.maxPrice != null) ...[
-                    const SizedBox(width: 8),
-                    FilterChip(
-                      label: Text(
-                          'Max: ${vehicleState.maxPrice!.toStringAsFixed(0)} FCFA'),
-                      selected: true,
-                      onSelected: (_) {
-                        ref
-                            .read(vehicleProvider.notifier)
-                            .setMaxPrice(null);
-                      },
-                    ),
-                  ],
-                  const Spacer(),
-                  TextButton.icon(
-                    icon: const Icon(Icons.clear_all, size: 18),
-                    label: const Text('Effacer'),
+                  ),
+                  TextButton(
                     onPressed: () =>
                         ref.read(vehicleProvider.notifier).clearFilters(),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.clear_all, size: 18),
+                        SizedBox(width: 4),
+                        Text('Effacer'),
+                      ],
+                    ),
                   ),
                 ],
               ),
