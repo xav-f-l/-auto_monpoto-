@@ -51,7 +51,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authState = ref.watch(authProvider);
 
     ref.listen<AuthState>(authProvider, (prev, next) {
-      if (next.status == AuthStatus.authenticated) {
+      if (next.status == AuthStatus.emailNotVerified) {
+        context.go('/email-verification');
+      } else if (next.status == AuthStatus.authenticated) {
         context.go('/home');
       }
     });
