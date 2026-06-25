@@ -79,6 +79,11 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // Collection group pour lecture admin de tous les documents utilisateurs
+    match /{path=**}/documents/{docId} {
+      allow read: if isAdmin();
+    }
+
     // ==================== REFUS PAR DÉFAUT ====================
     match /{document=**} {
       allow read, write: if false;
