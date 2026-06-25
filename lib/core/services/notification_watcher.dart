@@ -15,9 +15,11 @@ class NotificationWatcher {
     final user = _ref.read(authProvider).user;
     if (user == null) return;
 
+    final startTime = DateTime.now().toUtc();
+
     _subscription = FirebaseFirestore.instance
         .collection('notifications')
-        .where('createdAt', isGreaterThan: DateTime.now().subtract(const Duration(days: 7)))
+        .where('createdAt', isGreaterThan: startTime.subtract(const Duration(seconds: 5)))
         .snapshots()
         .listen((snapshot) {
       for (final change in snapshot.docChanges) {
@@ -56,7 +58,7 @@ class NotificationWatcher {
       body: data['body'] ?? '',
     );
 
-    doc.reference.delete();
+    // Notification gardée dans Firestore pour l'historique
   }
 
   void dispose() {

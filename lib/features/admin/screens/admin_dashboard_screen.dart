@@ -108,6 +108,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
           Icons.people,
           AppColors.accent,
         ),
+        _buildStatCard(
+          'Notifications',
+          '${state.notificationsCount}',
+          Icons.notifications,
+          Colors.amber,
+        ),
       ],
     );
   }
@@ -241,32 +247,37 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
-        Row(
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1.6,
           children: [
-            Expanded(
-              child: _buildActionCard(
-                'Véhicules',
-                Icons.directions_car,
-                AppColors.primary,
-                () => context.go('/admin/vehicles'),
-              ),
+            _buildActionCard(
+              'Véhicules',
+              Icons.directions_car,
+              AppColors.primary,
+              () => context.go('/admin/vehicles'),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildActionCard(
-                'Réservations',
-                Icons.calendar_month,
-                AppColors.success,
-                () => context.go('/admin/bookings'),
-              ),
+            _buildActionCard(
+              'Réservations',
+              Icons.calendar_month,
+              AppColors.success,
+              () => context.go('/admin/bookings'),
             ),
-            Expanded(
-              child: _buildActionCard(
-                'Ajouter',
-                Icons.add_circle,
-                AppColors.accent,
-                () => context.go('/admin/add-vehicle'),
-              ),
+            _buildActionCard(
+              'Ajouter',
+              Icons.add_circle,
+              AppColors.accent,
+              () => context.go('/admin/add-vehicle'),
+            ),
+            _buildActionCard(
+              'Profil',
+              Icons.person,
+              AppColors.info,
+              () => context.go('/admin/profile'),
             ),
           ],
         ),
@@ -276,28 +287,29 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   Widget _buildActionCard(
       String label, IconData icon, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
+    return Material(
+      color: color.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 32),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

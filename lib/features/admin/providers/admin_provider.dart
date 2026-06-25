@@ -12,6 +12,7 @@ class AdminState {
   final int totalUsers;
   final double totalRevenue;
   final int activeBookings;
+  final int notificationsCount;
   final bool isLoading;
   final String? error;
 
@@ -21,6 +22,7 @@ class AdminState {
     this.totalUsers = 0,
     this.totalRevenue = 0,
     this.activeBookings = 0,
+    this.notificationsCount = 0,
     this.isLoading = false,
     this.error,
   });
@@ -31,6 +33,7 @@ class AdminState {
     int? totalUsers,
     double? totalRevenue,
     int? activeBookings,
+    int? notificationsCount,
     bool? isLoading,
     String? error,
   }) {
@@ -40,6 +43,7 @@ class AdminState {
       totalUsers: totalUsers ?? this.totalUsers,
       totalRevenue: totalRevenue ?? this.totalRevenue,
       activeBookings: activeBookings ?? this.activeBookings,
+      notificationsCount: notificationsCount ?? this.notificationsCount,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
@@ -90,11 +94,18 @@ class AdminNotifier extends StateNotifier<AdminState> {
       final activeBookings =
           bookings.where((b) => b.isActive).length;
 
+      final notificationsSnap = await _firestore
+          .collection('notifications')
+          .where('createdAt', isGreaterThan: DateTime.now().subtract(const Duration(days: 7)))
+          .get();
+      final notificationsCount = notificationsSnap.docs.length;
+
       state = state.copyWith(
         bookings: bookings,
         totalUsers: totalUsers,
         totalRevenue: totalRevenue,
         activeBookings: activeBookings,
+        notificationsCount: notificationsCount,
       );
     } catch (e) {
       state = state.copyWith(error: 'Erreur de chargement du dashboard');

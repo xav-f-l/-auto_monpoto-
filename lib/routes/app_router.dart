@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/auth/providers/auth_provider.dart';
+import '../core/services/notification_watcher_provider.dart';
 import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
@@ -15,6 +16,7 @@ import '../features/bookings/screens/my_bookings_screen.dart';
 import '../features/payments/screens/payment_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
 import '../features/profile/screens/documents_screen.dart';
+import '../features/notifications/screens/notifications_screen.dart';
 import '../features/admin/screens/admin_dashboard_screen.dart';
 import '../features/admin/screens/admin_vehicles_screen.dart';
 import '../features/admin/screens/admin_bookings_screen.dart';
@@ -36,16 +38,16 @@ class AppShell extends StatelessWidget {
   }
 }
 
-class MainShell extends StatefulWidget {
+class MainShell extends ConsumerStatefulWidget {
   final Widget child;
 
   const MainShell({super.key, required this.child});
 
   @override
-  State<MainShell> createState() => _MainShellState();
+  ConsumerState<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends ConsumerState<MainShell> {
   int _currentIndex = 0;
 
   final _routes = ['/home', '/vehicles', '/my-bookings', '/profile'];
@@ -72,6 +74,8 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(notificationWatcherProvider);
+
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: BottomNavigationBar(
@@ -118,7 +122,7 @@ class AdminShell extends ConsumerStatefulWidget {
 class _AdminShellState extends ConsumerState<AdminShell> {
   int _currentIndex = 0;
 
-  final _routes = ['/admin/vehicles', '/admin/bookings', '/admin/profile', '/admin'];
+  final _routes = ['/admin', '/admin/vehicles', '/admin/bookings', '/admin/profile'];
 
   @override
   void didChangeDependencies() {
@@ -134,7 +138,10 @@ class _AdminShellState extends ConsumerState<AdminShell> {
 
   void _updateIndex() {
     final location = GoRouterState.of(context).uri.toString();
-    final index = _routes.indexWhere((r) => location.startsWith(r));
+    final index = _routes.indexWhere((r) {
+      if (r == '/admin') return location == '/admin';
+      return location.startsWith(r);
+    });
     if (index != -1 && index != _currentIndex) {
       setState(() => _currentIndex = index);
     }
@@ -149,6 +156,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    ref.watch(notificationWatcherProvider);
 
     return Scaffold(
       body: Column(
@@ -265,6 +273,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/documents',
           builder: (context, state) => const DocumentsScreen(),
+        ),
+        GoRoute(
+          path: '/notifications',
+          builder: (context, state) => const NotificationsScreen(),
         ),
       ],
     ),
