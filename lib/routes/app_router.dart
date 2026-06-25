@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../features/auth/providers/auth_provider.dart';
 import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
@@ -19,7 +21,6 @@ import '../features/admin/screens/admin_bookings_screen.dart';
 import '../features/admin/screens/add_vehicle_screen.dart';
 import '../features/admin/screens/edit_vehicle_screen.dart';
 import '../features/vehicles/models/vehicle_model.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
 class AppShell extends StatelessWidget {
@@ -147,8 +148,30 @@ class _AdminShellState extends ConsumerState<AdminShell> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+
     return Scaffold(
-      body: widget.child,
+      body: Column(
+        children: [
+          if (!authState.emailVerified)
+            MaterialBanner(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              content: const Text(
+                'Vérifie ton email pour valider ton compte',
+                style: TextStyle(fontSize: 13),
+              ),
+              leading: const Icon(Icons.mark_email_unread, color: Colors.orange),
+              actions: [
+                TextButton(
+                  onPressed: () =>
+                      ref.read(authProvider.notifier).resendVerificationEmail(),
+                  child: const Text('Renvoyer'),
+                ),
+              ],
+            ),
+          Expanded(child: widget.child),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _go,

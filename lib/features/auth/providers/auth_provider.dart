@@ -10,12 +10,14 @@ class AuthState {
   final UserModel? user;
   final String? error;
   final bool isAdmin;
+  final bool emailVerified;
 
   const AuthState({
     this.status = AuthStatus.uninitialized,
     this.user,
     this.error,
     this.isAdmin = false,
+    this.emailVerified = true,
   });
 
   AuthState copyWith({
@@ -23,12 +25,14 @@ class AuthState {
     UserModel? user,
     String? error,
     bool? isAdmin,
+    bool? emailVerified,
   }) {
     return AuthState(
       status: status ?? this.status,
       user: user ?? this.user,
       error: error,
       isAdmin: isAdmin ?? this.isAdmin,
+      emailVerified: emailVerified ?? this.emailVerified,
     );
   }
 }
@@ -50,14 +54,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       return;
     }
-    if (!firebaseUser.emailVerified) {
-      state = state.copyWith(status: AuthStatus.emailNotVerified, error: null);
-      return;
-    }
-    await _loadUser(firebaseUser.uid);
+    await _loadUser(firebaseUser.uid, emailVerified: firebaseUser.emailVerified);
   }
 
-  Future<void> _loadUser(String uid) async {
+  Future<void> _loadUser(String uid, {bool emailVerified = true}) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
       if (doc.exists) {
@@ -66,6 +66,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           status: AuthStatus.authenticated,
           user: user,
           isAdmin: user.isAdmin,
+          emailVerified: emailVerified,
         );
       } else {
         state = state.copyWith(
@@ -97,8 +98,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         password: password,
       );
       final firebaseUser = credential.user!;
-      await firebaseUser.sendEmailVerification();
-
       final now = DateTime.now();
       final user = UserModel(
         id: firebaseUser.uid,
@@ -110,10 +109,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         updatedAt: now,
       );
       await _firestore.collection('users').doc(firebaseUser.uid).set(user.toMap());
-      state = state.copyWith(
-        status: AuthStatus.emailNotVerified,
-        user: user,
-      );
+      await firebaseUser.sendEmailVerification();
     } on FirebaseAuthException catch (e) {
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
@@ -139,11 +135,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       if (!credential.user!.emailVerified) {
         await credential.user!.sendEmailVerification();
-        state = state.copyWith(
-          status: AuthStatus.emailNotVerified,
-          error: 'Vérifie ton email avant de continuer',
-        );
-        return;
       }
     } on FirebaseAuthException catch (e) {
       state = state.copyWith(
