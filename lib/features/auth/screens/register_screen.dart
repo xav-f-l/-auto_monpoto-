@@ -23,6 +23,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
+  String? _emailError;
+
+  static final _emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
 
   @override
   void dispose() {
@@ -51,8 +55,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authState = ref.watch(authProvider);
 
     ref.listen<AuthState>(authProvider, (prev, next) {
-      if (next.status == AuthStatus.authenticated) {
-        context.go('/home');
+      if (next.status == AuthStatus.emailNotVerified) {
+        context.go('/email-verification');
       }
     });
 
@@ -116,9 +120,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   hint: 'exemple@email.com',
                   keyboardType: TextInputType.emailAddress,
                   prefixIcon: const Icon(Icons.email_outlined),
+                  errorText: _emailError,
+                  onChanged: (_) {
+                    final email = _emailController.text;
+                    if (email.isEmpty) {
+                      setState(() => _emailError = null);
+                    } else if (!_emailRegex.hasMatch(email)) {
+                      setState(() => _emailError = 'Email invalide');
+                    } else {
+                      setState(() => _emailError = null);
+                    }
+                  },
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Email requis';
-                    if (!v.contains('@')) return 'Email invalide';
+                    if (!_emailRegex.hasMatch(v)) return 'Email invalide';
                     return null;
                   },
                 ),

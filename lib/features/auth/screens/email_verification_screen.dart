@@ -17,20 +17,38 @@ class _EmailVerificationScreenState
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.listen(authProvider, (_, next) {
-          if (next.status == AuthStatus.authenticated) {
-            if (!mounted) return;
-            if (next.isAdmin) {
-              context.go('/admin');
-            } else {
-              context.go('/home');
-            }
-          }
-        }));
+    _startPolling();
+  }
+
+  void _startPolling() {
+    Future.microtask(() async {
+      await ref.read(authProvider.notifier).resendVerificationEmail();
+    });
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) _checkLoop();
+    });
+  }
+
+  void _checkLoop() {
+    ref.read(authProvider.notifier).checkEmailVerified();
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) _checkLoop();
+    });
+  }
+
+  void _onAuthChange(AuthState? prev, AuthState next) {
+    if (next.status == AuthStatus.authenticated) {
+      if (next.isAdmin) {
+        context.go('/admin');
+      } else {
+        context.go('/home');
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AuthState>(authProvider, _onAuthChange);
     final authState = ref.watch(authProvider);
     final email = authState.user?.email ?? '';
 
