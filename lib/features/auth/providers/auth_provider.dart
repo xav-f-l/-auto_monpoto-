@@ -59,6 +59,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> _loadUser(String uid, {bool emailVerified = true}) async {
     try {
+      if (!emailVerified) {
+        state = state.copyWith(
+          status: AuthStatus.emailNotVerified,
+          user: null,
+          isAdmin: false,
+          emailVerified: false,
+        );
+        return;
+      }
       final doc = await _firestore.collection('users').doc(uid).get();
       if (doc.exists) {
         final user = UserModel.fromMap(doc.data()!, doc.id);
@@ -66,7 +75,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           status: AuthStatus.authenticated,
           user: user,
           isAdmin: user.isAdmin,
-          emailVerified: emailVerified,
+          emailVerified: true,
         );
       } else {
         state = state.copyWith(
