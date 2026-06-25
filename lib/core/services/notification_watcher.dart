@@ -53,15 +53,20 @@ class NotificationWatcher {
         .orderBy('createdAt', descending: true)
         .get();
 
-    final docs = snapshot.docs;
-    if (docs.length <= 6) return;
-
-    final toDelete = docs.skip(6);
+    int keep = 6;
     final batch = FirebaseFirestore.instance.batch();
-    for (final doc in toDelete) {
-      batch.delete(doc.reference);
+    for (final doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>?;
+      final targetUserId = data?['userId'] as String?;
+      if (targetUserId == null || targetUserId == userId) {
+        if (keep > 0) {
+          keep--;
+        } else {
+          batch.delete(doc.reference);
+        }
+      }
     }
-    await batch.commit();
+    if (keep < 6) await batch.commit();
   }
 
   void _showNotification(DocumentSnapshot doc) {

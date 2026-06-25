@@ -60,7 +60,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   return const Center(
                       child: CircularProgressIndicator());
                 }
-                final docs = snapshot.data!.docs;
+                final docs = snapshot.data!.docs.where((doc) {
+                  final d = doc.data() as Map<String, dynamic>;
+                  final targetUserId = d['userId'] as String?;
+                  return targetUserId == null || targetUserId == user.id;
+                }).toList();
                 if (docs.isEmpty) {
                   return const Center(
                       child: Text('Aucune notification'));
