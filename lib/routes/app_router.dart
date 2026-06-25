@@ -234,6 +234,10 @@ final appRouter = GoRouter(
           path: '/email-verification',
           builder: (context, state) => const EmailVerificationScreen(),
         ),
+        GoRoute(
+          path: '/verify-email',
+          builder: (context, state) => const EmailVerificationScreen(),
+        ),
     ShellRoute(
       builder: (context, state, child) => MainShell(child: child),
       routes: [

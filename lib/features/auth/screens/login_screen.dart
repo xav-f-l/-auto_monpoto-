@@ -46,7 +46,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           context.go('/home');
         }
       } else if (next.status == AuthStatus.emailNotVerified) {
-        context.go('/email-verification');
+        context.go('/verify-email');
       }
     });
 

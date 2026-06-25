@@ -143,7 +143,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
         password: password,
       );
       if (!credential.user!.emailVerified) {
-        await credential.user!.sendEmailVerification();
+        await _auth.signOut();
+        state = state.copyWith(
+          status: AuthStatus.unauthenticated,
+          error:
+              'Veuillez vérifier votre email avant de vous connecter. Vérifiez votre boîte mail.',
+        );
+        return;
       }
     } on FirebaseAuthException catch (e) {
       state = state.copyWith(
