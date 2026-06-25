@@ -68,27 +68,40 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
           ),
           if (vehicleState.selectedCategory != null ||
               vehicleState.maxPrice != null)
-            Container(
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   if (vehicleState.selectedCategory != null)
-                    Chip(
+                    FilterChip(
                       label: Text(vehicleState.selectedCategory!),
-                      onDeleted: () {
-                        ref.read(vehicleProvider.notifier).setCategory(null);
+                      selected: true,
+                      onSelected: (_) {
+                        ref
+                            .read(vehicleProvider.notifier)
+                            .setCategory(null);
                       },
                     ),
                   if (vehicleState.maxPrice != null) ...[
                     const SizedBox(width: 8),
-                    Chip(
+                    FilterChip(
                       label: Text(
                           'Max: ${vehicleState.maxPrice!.toStringAsFixed(0)} FCFA'),
-                      onDeleted: () {
-                        ref.read(vehicleProvider.notifier).setMaxPrice(null);
+                      selected: true,
+                      onSelected: (_) {
+                        ref
+                            .read(vehicleProvider.notifier)
+                            .setMaxPrice(null);
                       },
                     ),
                   ],
+                  const Spacer(),
+                  TextButton.icon(
+                    icon: const Icon(Icons.clear_all, size: 18),
+                    label: const Text('Effacer'),
+                    onPressed: () =>
+                        ref.read(vehicleProvider.notifier).clearFilters(),
+                  ),
                 ],
               ),
             ),

@@ -18,6 +18,7 @@ import '../features/profile/screens/profile_screen.dart';
 import '../features/profile/screens/documents_screen.dart';
 import '../features/notifications/screens/notifications_screen.dart';
 import '../features/admin/screens/admin_dashboard_screen.dart';
+import '../features/admin/screens/admin_documents_screen.dart';
 import '../features/admin/screens/admin_vehicles_screen.dart';
 import '../features/admin/screens/admin_bookings_screen.dart';
 import '../features/admin/screens/add_vehicle_screen.dart';
@@ -309,6 +310,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/admin/profile',
           builder: (context, state) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: '/admin/documents',
+          builder: (context, state) => const AdminDocumentsScreen(),
         ),
       ],
     ),

@@ -279,6 +279,18 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               AppColors.info,
               () => context.go('/admin/profile'),
             ),
+            _buildActionCard(
+              'Documents',
+              Icons.verified_user,
+              Colors.amber,
+              () => context.go('/admin/documents'),
+            ),
+            _buildActionCard(
+              'Notifications',
+              Icons.notifications,
+              AppColors.accent,
+              () => context.go('/notifications'),
+            ),
           ],
         ),
       ],
