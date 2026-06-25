@@ -8,6 +8,8 @@ import '../../features/notifications/providers/notification_preferences_provider
 class NotificationWatcher {
   final Ref _ref;
   StreamSubscription<QuerySnapshot>? _subscription;
+  final Set<String> _processedIds = {};
+  bool _isFirstSnapshot = true;
 
   NotificationWatcher(this._ref);
 
@@ -15,22 +17,27 @@ class NotificationWatcher {
     final user = _ref.read(authProvider).user;
     if (user == null) return;
 
-    final startTime = DateTime.now().toUtc();
-
     _subscription = FirebaseFirestore.instance
         .collection('notifications')
-        .where('createdAt', isGreaterThan: startTime.subtract(const Duration(seconds: 5)))
+        .where('createdAt',
+            isGreaterThan: DateTime.now().subtract(const Duration(days: 7)))
         .snapshots()
         .listen((snapshot) {
       for (final change in snapshot.docChanges) {
         if (change.type == DocumentChangeType.added) {
-          _handleNotification(change.doc);
+          if (_isFirstSnapshot) {
+            _processedIds.add(change.doc.id);
+          } else if (!_processedIds.contains(change.doc.id)) {
+            _processedIds.add(change.doc.id);
+            _showNotification(change.doc);
+          }
         }
       }
+      _isFirstSnapshot = false;
     });
   }
 
-  void _handleNotification(DocumentSnapshot doc) {
+  void _showNotification(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>?;
     if (data == null) return;
 
@@ -57,8 +64,6 @@ class NotificationWatcher {
       title: data['title'] ?? 'Auto Monpoto',
       body: data['body'] ?? '',
     );
-
-    // Notification gardée dans Firestore pour l'historique
   }
 
   void dispose() {
