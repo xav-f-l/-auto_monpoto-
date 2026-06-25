@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_model.dart';
 
-enum AuthStatus { uninitialized, authenticated, unauthenticated, loading }
+enum AuthStatus { uninitialized, authenticated, unauthenticated, loading, emailNotVerified }
 
 class AuthState {
   final AuthStatus status;
@@ -50,6 +50,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       return;
     }
+    if (!firebaseUser.emailVerified) {
+      state = state.copyWith(status: AuthStatus.emailNotVerified, error: null);
+      return;
+    }
     await _loadUser(firebaseUser.uid);
   }
 
@@ -92,10 +96,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
         email: email.trim(),
         password: password,
       );
-      final uid = credential.user!.uid;
+      final firebaseUser = credential.user!;
+      await firebaseUser.sendEmailVerification();
+
       final now = DateTime.now();
       final user = UserModel(
-        id: uid,
+        id: firebaseUser.uid,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim(),
@@ -103,9 +109,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         createdAt: now,
         updatedAt: now,
       );
-      await _firestore.collection('users').doc(uid).set(user.toMap());
+      await _firestore.collection('users').doc(firebaseUser.uid).set(user.toMap());
       state = state.copyWith(
-        status: AuthStatus.authenticated,
+        status: AuthStatus.emailNotVerified,
         user: user,
       );
     } on FirebaseAuthException catch (e) {
@@ -127,10 +133,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }) async {
     state = state.copyWith(status: AuthStatus.loading, error: null);
     try {
-      await _auth.signInWithEmailAndPassword(
+      final credential = await _auth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
+      if (!credential.user!.emailVerified) {
+        await credential.user!.sendEmailVerification();
+        state = state.copyWith(
+          status: AuthStatus.emailNotVerified,
+          error: 'Vérifie ton email avant de continuer',
+        );
+        return;
+      }
     } on FirebaseAuthException catch (e) {
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
@@ -141,6 +155,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
         status: AuthStatus.unauthenticated,
         error: 'Erreur de connexion',
       );
+    }
+  }
+
+  Future<void> checkEmailVerified() async {
+    final firebaseUser = _auth.currentUser;
+    if (firebaseUser == null) return;
+    await firebaseUser.reload();
+    if (!_auth.currentUser!.emailVerified) {
+      state = state.copyWith(error: 'Email pas encore vérifié');
+      return;
+    }
+    await _loadUser(_auth.currentUser!.uid);
+  }
+
+  Future<void> resendVerificationEmail() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      await user.sendEmailVerification();
+      state = state.copyWith(error: null);
     }
   }
 

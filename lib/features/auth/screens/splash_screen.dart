@@ -35,7 +35,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     await Future.delayed(AppConstants.splashDuration);
     final authState = ref.read(authProvider);
     if (!mounted) return;
-    if (authState.status == AuthStatus.authenticated) {
+    if (authState.status == AuthStatus.emailNotVerified) {
+      context.go('/email-verification');
+    } else if (authState.status == AuthStatus.authenticated) {
       if (authState.isAdmin) {
         context.go('/admin');
       } else {

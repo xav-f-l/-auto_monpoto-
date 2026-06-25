@@ -4,6 +4,7 @@ import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
 import '../features/auth/screens/forgot_password_screen.dart';
+import '../features/auth/screens/email_verification_screen.dart';
 import '../features/vehicles/screens/home_screen.dart';
 import '../features/vehicles/screens/vehicle_list_screen.dart';
 import '../features/vehicles/screens/vehicle_detail_screen.dart';
@@ -193,10 +194,14 @@ final appRouter = GoRouter(
       path: '/register',
       builder: (context, state) => const RegisterScreen(),
     ),
-    GoRoute(
-      path: '/forgot-password',
-      builder: (context, state) => const ForgotPasswordScreen(),
-    ),
+        GoRoute(
+          path: '/forgot-password',
+          builder: (context, state) => const ForgotPasswordScreen(),
+        ),
+        GoRoute(
+          path: '/email-verification',
+          builder: (context, state) => const EmailVerificationScreen(),
+        ),
     ShellRoute(
       builder: (context, state, child) => MainShell(child: child),
       routes: [
