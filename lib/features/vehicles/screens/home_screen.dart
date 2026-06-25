@@ -6,6 +6,7 @@ import '../providers/vehicle_provider.dart';
 import '../models/vehicle_model.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -13,70 +14,151 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vehicleState = ref.watch(vehicleProvider);
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Auto Monpoto'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => context.push('/notifications'),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildBanner(),
-            const SizedBox(height: 24),
-            _buildSearchBar(context, ref),
-            const SizedBox(height: 24),
-            _buildSectionHeader(context, 'Catégories', () {
-              ref.read(vehicleProvider.notifier).setCategory(null);
-              context.push('/vehicles');
-            }),
-            const SizedBox(height: 12),
-            _buildCategories(context, ref),
-            const SizedBox(height: 24),
-            _buildSectionHeader(context, 'Véhicules populaires', () {
-              context.push('/vehicles');
-            }),
-            const SizedBox(height: 12),
-            if (vehicleState.isLoading)
-              const Center(child: CircularProgressIndicator())
-            else
-              SizedBox(
-                height: 220,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: vehicleState.popularVehicles.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    return _buildVehicleCard(
-                      context,
-                      vehicleState.popularVehicles[index],
-                    );
-                  },
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 100,
+            floating: false,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.primary, AppColors.primaryDark],
+                  ),
+                ),
+                padding: EdgeInsets.only(
+                  left: 24,
+                  right: 24,
+                  bottom: 16,
+                  top: MediaQuery.of(context).padding.top + 16,
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundColor: Colors.white.withAlpha(51),
+                      backgroundImage: user?.photoUrl != null
+                          ? NetworkImage(user!.photoUrl!)
+                          : null,
+                      child: user?.photoUrl == null
+                          ? Text(
+                              (user?.firstName.isNotEmpty == true
+                                      ? user!.firstName[0]
+                                      : '?')
+                                  .toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Bonjour, ${user?.firstName ?? "..."}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Prêt pour l\'aventure ?',
+                            style: TextStyle(
+                              color: Colors.white.withAlpha(204),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(51),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.notifications_outlined,
+                            color: Colors.white),
+                        onPressed: () => context.push('/notifications'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            const SizedBox(height: 24),
-            _buildSectionHeader(context, 'Tous les véhicules', () {
-              context.push('/vehicles');
-            }),
-            const SizedBox(height: 12),
-            if (vehicleState.isLoading)
-              const Center(child: CircularProgressIndicator())
-            else
-              ...vehicleState.vehicles
-                  .take(4)
-                  .map((v) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildVehicleListItem(context, v),
-                      )),
-          ],
-        ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.defaultPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildBanner(),
+                  const SizedBox(height: 24),
+                  _buildSearchBar(context, ref),
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(context, 'Catégories', () {
+                    ref.read(vehicleProvider.notifier).setCategory(null);
+                    context.push('/vehicles');
+                  }),
+                  const SizedBox(height: 12),
+                  _buildCategories(context, ref),
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(context, 'Véhicules populaires', () {
+                    context.push('/vehicles');
+                  }),
+                  const SizedBox(height: 12),
+                  if (vehicleState.isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else
+                    SizedBox(
+                      height: 240,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: vehicleState.popularVehicles.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          return _buildVehicleCard(
+                            context,
+                            vehicleState.popularVehicles[index],
+                          );
+                        },
+                      ),
+                    ),
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(context, 'Tous les véhicules', () {
+                    context.push('/vehicles');
+                  }),
+                  const SizedBox(height: 12),
+                  if (vehicleState.isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else
+                    ...vehicleState.vehicles
+                        .take(4)
+                        .map((v) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _buildVehicleListItem(context, v),
+                            )),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -101,7 +183,7 @@ class HomeScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  'Jusqu\'à -20%',
+                  "Jusqu'à -20%",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -112,7 +194,7 @@ class HomeScreen extends ConsumerWidget {
                 Text(
                   'Sur votre première location',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: Colors.white.withAlpha(230),
                     fontSize: 14,
                   ),
                 ),
@@ -123,7 +205,7 @@ class HomeScreen extends ConsumerWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.white.withAlpha(51),
               borderRadius: BorderRadius.circular(40),
             ),
             child: const Icon(
@@ -230,22 +312,48 @@ class HomeScreen extends ConsumerWidget {
             ClipRRect(
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(12)),
-              child: vehicle.images.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: vehicle.images.first,
-                      height: 120,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
-                        color: Colors.grey[200],
-                        height: 120,
+              child: Stack(
+                children: [
+                  vehicle.images.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: vehicle.images.first,
+                          height: 120,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => Container(
+                            color: Colors.grey[200],
+                            height: 120,
+                          ),
+                        )
+                      : Container(
+                          color: Colors.grey[200],
+                          height: 120,
+                          child: const Icon(Icons.directions_car, size: 48),
+                        ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: vehicle.available
+                            ? AppColors.success.withAlpha(204)
+                            : AppColors.error.withAlpha(204),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    )
-                  : Container(
-                      color: Colors.grey[200],
-                      height: 120,
-                      child: const Icon(Icons.directions_car, size: 48),
+                      child: Text(
+                        vehicle.available ? 'Disponible' : 'Indisponible',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
+                  ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(10),
@@ -299,19 +407,45 @@ class HomeScreen extends ConsumerWidget {
             ClipRRect(
               borderRadius:
                   const BorderRadius.horizontal(left: Radius.circular(12)),
-              child: vehicle.images.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: vehicle.images.first,
-                      width: 100,
-                      height: 90,
-                      fit: BoxFit.cover,
-                    )
-                  : Container(
-                      width: 100,
-                      height: 90,
-                      color: Colors.grey[200],
-                      child: const Icon(Icons.directions_car),
+              child: Stack(
+                children: [
+                  vehicle.images.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: vehicle.images.first,
+                          width: 100,
+                          height: 90,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          width: 100,
+                          height: 90,
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.directions_car),
+                        ),
+                  Positioned(
+                    top: 4,
+                    left: 4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: vehicle.available
+                            ? AppColors.success.withAlpha(204)
+                            : AppColors.error.withAlpha(204),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        vehicle.available ? 'Dispo' : 'Indispo',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
+                  ),
+                ],
+              ),
             ),
             Expanded(
               child: Padding(

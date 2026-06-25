@@ -167,24 +167,50 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
             ClipRRect(
               borderRadius:
                   const BorderRadius.horizontal(left: Radius.circular(12)),
-              child: vehicle.images.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: vehicle.images.first,
-                      width: 130,
-                      height: 110,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
-                        color: Colors.grey[200],
-                        width: 130,
-                        height: 110,
+              child: Stack(
+                children: [
+                  vehicle.images.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: vehicle.images.first,
+                          width: 130,
+                          height: 110,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => Container(
+                            color: Colors.grey[200],
+                            width: 130,
+                            height: 110,
+                          ),
+                        )
+                      : Container(
+                          width: 130,
+                          height: 110,
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.directions_car, size: 40),
+                        ),
+                  Positioned(
+                    top: 4,
+                    left: 4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: vehicle.available
+                            ? AppColors.success.withAlpha(204)
+                            : AppColors.error.withAlpha(204),
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                    )
-                  : Container(
-                      width: 130,
-                      height: 110,
-                      color: Colors.grey[200],
-                      child: const Icon(Icons.directions_car, size: 40),
+                      child: Text(
+                        vehicle.available ? 'Dispo' : 'Indispo',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
+                  ),
+                ],
+              ),
             ),
             Expanded(
               child: Padding(

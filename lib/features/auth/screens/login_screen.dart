@@ -51,106 +51,140 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
+      backgroundColor: AppColors.background,
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(24, 60, 24, 40),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.primary, AppColors.primaryDark],
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
+              ),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 40),
-                Icon(
+                const Icon(
                   Icons.directions_car,
                   size: 48,
-                  color: AppColors.primary,
+                  color: Colors.white,
                 ),
-                const SizedBox(height: 16),
-                Text(
+                const SizedBox(height: 20),
+                const Text(
                   'Content de vous revoir',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Connectez-vous pour continuer',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                ),
-                const SizedBox(height: 40),
-                CustomTextField(
-                  controller: _emailController,
-                  label: 'Email',
-                  hint: 'exemple@email.com',
-                  keyboardType: TextInputType.emailAddress,
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Email requis';
-                    if (!v.contains('@')) return 'Email invalide';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                CustomTextField(
-                  controller: _passwordController,
-                  label: 'Mot de passe',
-                  hint: 'Votre mot de passe',
-                  obscureText: _obscurePassword,
-                  prefixIcon: const Icon(Icons.lock_outlined),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                    ),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
+                  style: TextStyle(
+                    color: Colors.white.withAlpha(204),
+                    fontSize: 16,
                   ),
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Mot de passe requis';
-                    if (v.length < 6) return 'Minimum 6 caractères';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => context.push('/forgot-password'),
-                    child: const Text('Mot de passe oublié ?'),
-                  ),
-                ),
-                if (authState.error != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    authState.error!,
-                    style: const TextStyle(color: AppColors.error),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                CustomButton(
-                  text: 'Se connecter',
-                  isLoading: authState.status == AuthStatus.loading,
-                  onPressed: _handleLogin,
-                  icon: Icons.login,
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Vous n'avez pas de compte ?"),
-                    TextButton(
-                      onPressed: () => context.push('/register'),
-                      child: const Text("S'inscrire"),
-                    ),
-                  ],
                 ),
               ],
             ),
           ),
-        ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        CustomTextField(
+                          controller: _emailController,
+                          label: 'Email',
+                          hint: 'exemple@email.com',
+                          keyboardType: TextInputType.emailAddress,
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          validator: (v) {
+                            if (v == null || v.isEmpty) return 'Email requis';
+                            if (!v.contains('@')) return 'Email invalide';
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        CustomTextField(
+                          controller: _passwordController,
+                          label: 'Mot de passe',
+                          hint: 'Votre mot de passe',
+                          obscureText: _obscurePassword,
+                          prefixIcon: const Icon(Icons.lock_outlined),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () =>
+                                setState(() => _obscurePassword = !_obscurePassword),
+                          ),
+                          validator: (v) {
+                            if (v == null || v.isEmpty) return 'Mot de passe requis';
+                            if (v.length < 6) return 'Minimum 6 caractères';
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => context.push('/forgot-password'),
+                            child: const Text('Mot de passe oublié ?'),
+                          ),
+                        ),
+                        if (authState.error != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            authState.error!,
+                            style: const TextStyle(color: AppColors.error),
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+                        CustomButton(
+                          text: 'Se connecter',
+                          isLoading: authState.status == AuthStatus.loading,
+                          onPressed: _handleLogin,
+                          icon: Icons.login,
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("Vous n'avez pas de compte ?"),
+                            TextButton(
+                              onPressed: () => context.push('/register'),
+                              child: const Text("S'inscrire"),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
