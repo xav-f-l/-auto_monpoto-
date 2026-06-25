@@ -66,9 +66,10 @@ class _MainShellState extends ConsumerState<MainShell> {
 
   void _updateIndex() {
     final location = GoRouterState.of(context).uri.toString();
-    final index = _routes.indexWhere((r) => location.startsWith(r));
-    if (index != -1 && index != _currentIndex) {
-      setState(() => _currentIndex = index);
+    final path = location.split('?').first;
+    final newIndex = _routes.indexWhere((r) => path == r);
+    if (newIndex != -1 && newIndex != _currentIndex) {
+      setState(() => _currentIndex = newIndex);
     }
   }
 
@@ -138,12 +139,11 @@ class _AdminShellState extends ConsumerState<AdminShell> {
 
   void _updateIndex() {
     final location = GoRouterState.of(context).uri.toString();
-    final index = _routes.indexWhere((r) {
-      if (r == '/admin') return location == '/admin';
-      return location.startsWith(r);
-    });
-    if (index != -1 && index != _currentIndex) {
-      setState(() => _currentIndex = index);
+    // Enlever le query string si présent
+    final path = location.split('?').first;
+    final newIndex = _routes.indexWhere((r) => path == r);
+    if (newIndex != -1 && newIndex != _currentIndex) {
+      setState(() => _currentIndex = newIndex);
     }
   }
 
