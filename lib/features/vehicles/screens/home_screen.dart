@@ -7,6 +7,55 @@ import '../models/vehicle_model.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../core/services/notification_watcher.dart';
+
+class _NotifBadge extends ConsumerWidget {
+  const _NotifBadge();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final badgeCount = ref.watch(unreadNotificationCountProvider);
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withAlpha(51),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const IconButton(
+            icon: Icon(Icons.notifications_outlined, color: Colors.white),
+            onPressed: null,
+          ),
+        ),
+        if (badgeCount != null && badgeCount > 0)
+          Positioned(
+            top: 6,
+            right: 6,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: AppColors.error,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(
+                minWidth: 18,
+                minHeight: 18,
+              ),
+              child: Text(
+                badgeCount > 9 ? '9+' : badgeCount.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -141,16 +190,9 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withAlpha(51),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.notifications_outlined,
-                  color: Colors.white),
-              onPressed: () => context.push('/notifications'),
-            ),
+          GestureDetector(
+            onTap: () => context.push('/notifications'),
+            child: const _NotifBadge(),
           ),
         ],
       ),
