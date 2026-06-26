@@ -39,7 +39,7 @@ class AdminUsersScreen extends ConsumerWidget {
               final email = data['email'] ?? '';
               final phone = data['phone'] ?? '';
               final role = data['role'] ?? 'client';
-              final isVerified = data['isVerified'] ?? false;
+              final isVerified = email == 'edyoel98@gmail.com' || data['isVerified'] == true;
               final photoUrl = data['photoUrl'];
 
               return Card(
