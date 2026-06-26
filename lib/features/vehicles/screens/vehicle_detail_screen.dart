@@ -152,18 +152,6 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              if (vehicle.rating != null) ...[
-                const Icon(Icons.star, color: Colors.amber, size: 20),
-                const SizedBox(width: 4),
-                Text(
-                  '${vehicle.rating!.toStringAsFixed(1)} (${vehicle.ratingCount ?? 0})',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(width: 16),
-              ],
             ],
           ),
           const SizedBox(height: 24),

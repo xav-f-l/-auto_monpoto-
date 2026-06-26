@@ -332,7 +332,7 @@ class HomeScreen extends ConsumerWidget {
       child: Container(
         width: 200,
         decoration: BoxDecoration(
-          color: Theme.of(context).cardTheme.color ?? Colors.white,
+          color: Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -398,9 +398,10 @@ class HomeScreen extends ConsumerWidget {
                 children: [
                   Text(
                     vehicle.fullName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -428,7 +429,7 @@ class HomeScreen extends ConsumerWidget {
       onTap: () => context.push('/vehicle/${vehicle.id}'),
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).cardTheme.color ?? Colors.white,
+          color: Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(

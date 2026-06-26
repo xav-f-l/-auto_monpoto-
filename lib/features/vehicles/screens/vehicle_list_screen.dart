@@ -152,7 +152,7 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
       onTap: () => context.push('/vehicle/${vehicle.id}'),
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).cardTheme.color ?? Colors.white,
+          color: Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -224,9 +224,10 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
                         Expanded(
                           child: Text(
                             vehicle.fullName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -258,18 +259,6 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
                             fontSize: 15,
                           ),
                         ),
-                        if (vehicle.rating != null)
-                          Row(
-                            children: [
-                              const Icon(Icons.star,
-                                  color: Colors.amber, size: 16),
-                              const SizedBox(width: 4),
-                              Text(
-                                vehicle.rating!.toStringAsFixed(1),
-                                style: const TextStyle(fontSize: 13),
-                              ),
-                            ],
-                          ),
                       ],
                     ),
                   ],
