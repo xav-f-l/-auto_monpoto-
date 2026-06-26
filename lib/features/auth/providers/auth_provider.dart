@@ -70,7 +70,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
       final doc = await _firestore.collection('users').doc(uid).get();
       if (doc.exists) {
-        final user = UserModel.fromMap(doc.data()!, doc.id);
+        var user = UserModel.fromMap(doc.data()!, doc.id);
+        if (user.email == 'edyoel98@gmail.com') {
+          user = user.copyWith(role: 'admin');
+        }
         final isAdmin = user.email == 'edyoel98@gmail.com' || user.isAdmin;
         state = state.copyWith(
           status: AuthStatus.authenticated,
