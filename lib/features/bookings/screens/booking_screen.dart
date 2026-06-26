@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -113,14 +114,25 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Container(
-                      width: 80,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: SizedBox(
+                        width: 80,
+                        height: 60,
+                        child: vehicle.images.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: vehicle.images.first,
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) => Container(
+                                  color: Colors.grey[200],
+                                  child: const Icon(Icons.directions_car, size: 32),
+                                ),
+                              )
+                            : Container(
+                                color: Colors.grey[200],
+                                child: const Icon(Icons.directions_car, size: 32),
+                              ),
                       ),
-                      child: const Icon(Icons.directions_car, size: 32),
                     ),
                     const SizedBox(width: 12),
                     Column(
@@ -180,7 +192,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             CustomTextField(
               controller: _pickupController,
               label: 'Lieu de récupération',
-              hint: 'Adresse de départ',
+              hint: 'Sélectionner lieu de départ',
               prefixIcon: const Icon(Icons.location_on),
               onChanged: (v) =>
                   ref.read(bookingProvider.notifier).setPickupLocation(v),
@@ -189,7 +201,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             CustomTextField(
               controller: _returnController,
               label: 'Lieu de retour',
-              hint: 'Adresse de retour',
+              hint: 'Sélectionner lieu de retour',
               prefixIcon: const Icon(Icons.location_on),
               onChanged: (v) =>
                   ref.read(bookingProvider.notifier).setReturnLocation(v),
@@ -254,7 +266,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             Text(
               date != null
                   ? '${date.day}/${date.month}/${date.year}'
-                  : 'Sélectionner',
+                  : 'Veuillez sélectionner',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: date != null ? AppColors.textPrimary : Colors.grey,
