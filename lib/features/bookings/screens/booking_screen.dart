@@ -192,7 +192,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             CustomTextField(
               controller: _pickupController,
               label: 'Lieu de récupération',
-              hint: 'Sélectionner lieu de départ',
+              hint: 'Adresse de départ',
               prefixIcon: const Icon(Icons.location_on),
               onChanged: (v) =>
                   ref.read(bookingProvider.notifier).setPickupLocation(v),
@@ -201,7 +201,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             CustomTextField(
               controller: _returnController,
               label: 'Lieu de retour',
-              hint: 'Sélectionner lieu de retour',
+              hint: 'Adresse de retour',
               prefixIcon: const Icon(Icons.location_on),
               onChanged: (v) =>
                   ref.read(bookingProvider.notifier).setReturnLocation(v),
