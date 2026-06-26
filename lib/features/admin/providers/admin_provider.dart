@@ -175,6 +175,17 @@ class AdminNotifier extends StateNotifier<AdminState> {
     }
   }
 
+  Future<void> toggleVehicleAvailability(String id, bool currentStatus) async {
+    try {
+      await _firestore.collection('vehicles').doc(id).update({
+        'available': !currentStatus,
+        'updatedAt': Timestamp.now(),
+      });
+    } catch (e) {
+      state = state.copyWith(error: 'Erreur de mise à jour du statut');
+    }
+  }
+
   Future<void> updateBookingStatus(String bookingId, String status) async {
     try {
       final bookingSnap =

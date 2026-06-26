@@ -147,6 +147,24 @@ class AdminVehiclesScreen extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
+                              icon: Icon(
+                                vehicle.available
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                size: 20,
+                                color: vehicle.available
+                                    ? AppColors.error
+                                    : AppColors.success,
+                              ),
+                              onPressed: () => ref
+                                  .read(adminProvider.notifier)
+                                  .toggleVehicleAvailability(
+                                      vehicle.id, vehicle.available),
+                              tooltip: vehicle.available
+                                  ? 'Rendre indisponible'
+                                  : 'Rendre disponible',
+                            ),
+                            IconButton(
                               icon: const Icon(Icons.edit,
                                   size: 20, color: AppColors.info),
                               onPressed: () => context.push(
