@@ -79,7 +79,13 @@ class AdminUsersScreen extends ConsumerWidget {
                         children: [
                           const Icon(Icons.email_outlined, size: 14),
                           const SizedBox(width: 4),
-                          Text(email, style: const TextStyle(fontSize: 13)),
+                          Flexible(
+                            child: Text(
+                              email,
+                              style: const TextStyle(fontSize: 13),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                       if (phone.isNotEmpty)
@@ -87,7 +93,13 @@ class AdminUsersScreen extends ConsumerWidget {
                           children: [
                             const Icon(Icons.phone_outlined, size: 14),
                             const SizedBox(width: 4),
-                            Text(phone, style: const TextStyle(fontSize: 13)),
+                            Flexible(
+                              child: Text(
+                                phone,
+                                style: const TextStyle(fontSize: 13),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                           ],
                         ),
                     ],

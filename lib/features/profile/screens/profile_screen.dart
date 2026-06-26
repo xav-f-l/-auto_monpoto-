@@ -6,7 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/providers/theme_provider.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../notifications/providers/notification_prefs_section.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_text_field.dart';
@@ -314,8 +313,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               value: ref.watch(themeProvider) == ThemeMode.dark,
               onChanged: (_) => ref.read(themeProvider.notifier).toggle(),
             ),
-            const Divider(),
-            const NotificationPrefsSection(),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.info_outline, color: AppColors.textSecondary),
