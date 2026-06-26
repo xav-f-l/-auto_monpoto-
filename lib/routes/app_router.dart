@@ -23,6 +23,7 @@ import '../features/admin/screens/admin_vehicles_screen.dart';
 import '../features/admin/screens/admin_bookings_screen.dart';
 import '../features/admin/screens/add_vehicle_screen.dart';
 import '../features/admin/screens/edit_vehicle_screen.dart';
+import '../features/admin/screens/admin_users_screen.dart';
 import '../features/vehicles/models/vehicle_model.dart';
 
 
@@ -124,7 +125,7 @@ class AdminShell extends ConsumerStatefulWidget {
 class _AdminShellState extends ConsumerState<AdminShell> {
   int _currentIndex = 0;
 
-  final _routes = ['/admin', '/admin/vehicles', '/admin/bookings', '/admin/profile'];
+  final _routes = ['/admin', '/admin/vehicles', '/admin/bookings', '/admin/users', '/admin/profile'];
 
   @override
   void didChangeDependencies() {
@@ -199,6 +200,11 @@ class _AdminShellState extends ConsumerState<AdminShell> {
             icon: Icon(Icons.calendar_month_outlined),
             activeIcon: Icon(Icons.calendar_month),
             label: 'Réservations',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people_outline),
+            activeIcon: Icon(Icons.people),
+            label: 'Utilisateurs',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
@@ -299,6 +305,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/admin/bookings',
           builder: (context, state) => const AdminBookingsScreen(),
+        ),
+        GoRoute(
+          path: '/admin/users',
+          builder: (context, state) => const AdminUsersScreen(),
         ),
         GoRoute(
           path: '/admin/add-vehicle',
