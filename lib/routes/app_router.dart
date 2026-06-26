@@ -125,7 +125,7 @@ class AdminShell extends ConsumerStatefulWidget {
 class _AdminShellState extends ConsumerState<AdminShell> {
   int _currentIndex = 0;
 
-  final _routes = ['/admin', '/admin/vehicles', '/admin/bookings', '/admin/users', '/admin/profile'];
+  final _routes = ['/admin', '/admin/vehicles', '/admin/bookings', '/admin/users', '/admin/notifications', '/admin/profile'];
 
   @override
   void didChangeDependencies() {
@@ -328,6 +328,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/admin/documents',
           builder: (context, state) => const DocumentsScreen(),
+        ),
+        GoRoute(
+          path: '/admin/notifications',
+          builder: (context, state) => const NotificationsScreen(),
         ),
         GoRoute(
           path: '/admin/verify-documents',

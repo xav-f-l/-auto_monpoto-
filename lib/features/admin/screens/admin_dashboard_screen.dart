@@ -289,7 +289,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               'Notifications',
               Icons.notifications,
               AppColors.accent,
-              () => context.go('/notifications'),
+              () => context.go('/admin/notifications'),
             ),
             _buildActionCard(
               'Utilisateurs',
