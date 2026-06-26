@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/providers/theme_provider.dart';
 import '../../../core/theme/app_colors.dart';
@@ -68,6 +69,63 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     setState(() => _isEditing = false);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Profil mis à jour')),
+    );
+  }
+
+  void _showAbout() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.directions_car, color: AppColors.primary, size: 28),
+            const SizedBox(width: 12),
+            const Text('Auto Monpoto'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Auto Monpoto est une plateforme de location de véhicules '
+              'qui vous permet de récérer la voiture idéale pour vos '
+              'déplacements, en toute simplicité et sécurité.',
+              style: TextStyle(fontSize: 14, height: 1.5),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Contact',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () => launchUrl(Uri.parse('tel:076350009')),
+              child: Row(
+                children: [
+                  const Icon(Icons.phone, size: 18, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    '076350009',
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 14,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Fermer'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -263,7 +321,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               leading: const Icon(Icons.info_outline, color: AppColors.textSecondary),
               title: const Text('À propos'),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () {},
+              onTap: _showAbout,
             ),
             const SizedBox(height: 16),
             CustomButton(
